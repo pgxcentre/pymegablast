@@ -161,6 +161,7 @@ group = parser.add_argument_group("Input Files")
 group.add_argument("-i", "--input", type=str, metavar="FILE", required=True,
                    help=("The file containing the sequence(s)."))
 
+# The sequence pre-processing options
 group = parser.add_argument_group("Sequence(s) Pre-Processing")
 group.add_argument("-w", "--window", action="store_true",
                    help=("If set to True, the sequence(s) will be split by a "
@@ -170,6 +171,7 @@ group.add_argument("-wl", "--window-length", type=int, metavar="INT",
                    default=20, help=("The window size (if -w/--window option "
                                      "is used). [Default: %(default)d]"))
 
+# The megablast options
 group = parser.add_argument_group("MegaBlast Options")
 group.add_argument("-d", "--database", type=str, metavar="PATH",
                    default=os.path.join(os.sep, "opt", "test"),
@@ -184,6 +186,7 @@ group.add_argument("-s", "--minimal-hit-score", type=int, metavar="INT",
                    default=17, help=("The minimal hit score for MegaBlast. "
                                      "[Default: %(default)d]"))
 
+# Were to save the output files
 group = parser.add_argument_group("Output Files")
 group.add_argument("-o", "--output-dir", type=str, metavar="DIR",
                    default="megablast.{}".format(

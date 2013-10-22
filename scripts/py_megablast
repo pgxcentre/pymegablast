@@ -19,6 +19,7 @@ import sys
 import shutil
 import argparse
 from datetime import datetime
+from collections import Counter
 from subprocess import check_output, CalledProcessError
 
 from Bio import SeqIO
@@ -51,9 +52,40 @@ def main():
         shutil.copyfile(args.input, sequence_file)
 
     # Running megablast
-    result = run_megablast(sequence_file, args.output_dir, args)
+##     results = run_megablast(sequence_file, args.output_dir, args)
 
-    print result[0]
+    results = ["# BLASTN 2.2.26 [Sep-21-2011]",
+              "# Query: 2436 sequences",
+              "# Database: /mnt/isi/reference/Genome_Build_37/chromosomes",
+              "# Fields: Query id, Subject id, % identity, alignment length, mismatches, gap openings, q. start, q. end, s. start, s. end, e-value, bit score",
+              "KCNQ1_a_99\tgi|224589800|ref|NC_000001.10|  96.15   26      1       0       1       26      984437  984462  0.002   44.1",
+              "KCNQ1_a_98\tgi|224589800|ref|NC_000001.10|  96.15   26      1       0       2       27      984437  984462  0.002   44.1",
+              "KCNQ1_a_97\tgi|224589800|ref|NC_000001.10|  96.15   26      1       0       3       28      984437  984462  0.002   44.1",
+              "KCNQ1_a_97\tgi|224589800|ref|NC_000001.10|  96.15   26      1       0       4       29      984437  984462  0.002   44.1",
+              ]
+
+    parse_results(results)
+
+
+
+def parse_results(results):
+    """Parse the megablast results.
+
+    :param results: the megablast results
+
+    :type results: list of strings
+
+    :returns: a counter of sequences.
+
+    """
+    # Removes the comment lines at the beginning of the output
+    while results[0].startswith("#"):
+        del results[0]
+
+    # Count the number of appearance of each sequence
+    counter = Counter([i.split("\t")[0] for i in results])
+
+    return counter
 
 
 

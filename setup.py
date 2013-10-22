@@ -16,7 +16,7 @@ if major==2 and minor<7 or major<2:
 if major==3:
     raise SystemExit("""Doesn't work on Python 3...""")
 
-setup(name="wrapper_megablast",
+setup(name="py_megablast",
       version="0.1",
       description="Wrapper for megablast",
       author="Louis-Philippe Lemieux Perreault",

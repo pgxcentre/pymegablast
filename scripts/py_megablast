@@ -25,7 +25,7 @@ from subprocess import check_output, CalledProcessError
 from Bio import SeqIO
 
 # Getting the version
-prog_version = "0.1"
+prog_version = "0.2"
 
 def main():
     """The main function.

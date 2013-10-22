@@ -239,7 +239,9 @@ group.add_argument("-wl", "--window-length", type=int, metavar="INT",
 # The megablast options
 group = parser.add_argument_group("MegaBlast Options")
 group.add_argument("-d", "--database", type=str, metavar="PATH",
-                   default=os.path.join(os.sep, "opt", "test"),
+                   default=os.path.join(os.sep, "mnt", "isi",
+                                        "reference","Genome_Build_37",
+                                        "chromosomes"),
                    help=("The database to use for the search. "
                          "[Default: %(default)s]"))
 group.add_argument("-D", "--output-format", type=int, metavar="INT", default=3,

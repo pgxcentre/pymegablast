@@ -52,17 +52,7 @@ def main():
         shutil.copyfile(args.input, sequence_file)
 
     # Running megablast
-##     results = run_megablast(sequence_file, args.output_dir, args)
-
-    results = ["# BLASTN 2.2.26 [Sep-21-2011]",
-              "# Query: 2436 sequences",
-              "# Database: /mnt/isi/reference/Genome_Build_37/chromosomes",
-              "# Fields: Query id, Subject id, % identity, alignment length, mismatches, gap openings, q. start, q. end, s. start, s. end, e-value, bit score",
-              "KCNQ1_a_99\tgi|224589800|ref|NC_000001.10|  96.15   26      1       0       1       26      984437  984462  0.002   44.1",
-              "KCNQ1_a_98\tgi|224589800|ref|NC_000001.10|  96.15   26      1       0       2       27      984437  984462  0.002   44.1",
-              "KCNQ1_a_97\tgi|224589800|ref|NC_000001.10|  96.15   26      1       0       3       28      984437  984462  0.002   44.1",
-              "KCNQ1_a_97\tgi|224589800|ref|NC_000001.10|  96.15   26      1       0       4       29      984437  984462  0.002   44.1",
-              ]
+    results = run_megablast(sequence_file, args.output_dir, args)
 
     # Parsing the results
     results = parse_results(results)

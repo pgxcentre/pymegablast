@@ -19,6 +19,7 @@ import sys
 import shutil
 import argparse
 from datetime import datetime
+from subprocess import check_output, CalledProcessError
 
 from Bio import SeqIO
 
@@ -48,6 +49,65 @@ def main():
     else:
         # We don't split, so just copy the file
         shutil.copyfile(args.input, sequence_file)
+
+    # Running megablast
+    result = run_megablast(sequence_file, args.output_dir, args)
+
+    print result[0]
+
+
+
+def run_megablast(sequence_file, output_dir, options):
+    """Runs megablast with options.
+
+    :param sequence_file: the name of the sequence file
+    :param output_dir: the output directory
+    :param options: the options
+
+    :type sequence_file: string
+    :type output_dir: string
+    :type options: Namespace
+
+    :returns: a list of the output
+
+    """
+    output = None
+    try:
+        print
+        output = check_output(["megablast",
+                               "-d", options.database,
+                               "-i", sequence_file,
+                               "-D", str(options.output_format),
+                               "-W", str(options.word_size),
+                               "-s", str(options.minimal_hit_score)])
+        print
+    except OSError:
+        msg = "megablast: command not found"
+        raise ProgramError(msg)
+    except CalledProcessError:
+        msg = "megablast: problem with megablast"
+        raise ProgramError(msg)
+
+    # Splitting the output
+    output = output.split("\n")
+
+    # Opening the output file
+    o_file = None
+    try:
+        o_file = open(os.path.join(output_dir, "megablast_results.txt"), "w")
+    except IOError:
+        msg = "can't write file to {}".format(output_dir)
+        raise ProgramError(msg)
+
+    # Writing the results
+    for line in output:
+        print >>o_file, line
+
+    # Closing the file
+    o_file.close()
+
+    return output
+
 
 
 def split_fasta_sequences(input_file, window_length, output_file):
@@ -86,6 +146,7 @@ def split_fasta_sequences(input_file, window_length, output_file):
     SeqIO.write(sequences, output_file, "fasta")
 
 
+
 def check_args(args):
     """Checks the arguments and options.
 
@@ -113,6 +174,7 @@ def check_args(args):
     return True
 
 
+
 def parse_args():
     """Parses the command line options and arguments.
 
@@ -134,6 +196,7 @@ def parse_args():
     return parser.parse_args()
 
 
+
 class ProgramError(Exception):
     """An :py:class:`Exception` raised in case of a problem.
     
@@ -152,6 +215,7 @@ class ProgramError(Exception):
 
     def __str__(self):
         return self.message
+
 
 
 # The parser object
@@ -194,6 +258,8 @@ group.add_argument("-o", "--output-dir", type=str, metavar="DIR",
                         datetime.today().strftime("%Y-%m-%d_%H.%M.%S")),
                    help=("The name of the output directory. "
                          "[Default: %(default)s]"))
+
+
 
 # Calling the main, if necessery
 if __name__ == "__main__":

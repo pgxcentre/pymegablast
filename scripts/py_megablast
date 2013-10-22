@@ -64,7 +64,37 @@ def main():
               "KCNQ1_a_97\tgi|224589800|ref|NC_000001.10|  96.15   26      1       0       4       29      984437  984462  0.002   44.1",
               ]
 
-    parse_results(results)
+    # Parsing the results
+    results = parse_results(results)
+
+    # Now generate the final output
+    generate_final_output(results, sequence_file, args.output_dir)
+
+
+
+def generate_final_output(results, sequence_file, output_dir):
+    """Generate the final report.
+
+    :param results: a counter of sequence
+    :param sequence_file: the fasta file containing the sequences
+    :output_dir: the output directory
+
+    :type results: collections.Counter
+
+    """
+    # The output file
+    o_file = None
+    try:
+        o_file = open(os.path.join(output_dir, "final_report.txt"), 'w')
+    except IOError:
+        msg = "can't write to {}".format(output_dir)
+        raise ProgramError(msg)
+
+    for seq in SeqIO.parse(sequence_file, "fasta"):
+        print >>o_file, "\t".join([seq.id, str(seq.seq), str(results[seq.id])])
+
+    # Closing the file
+    o_file.close()
 
 
 
@@ -100,7 +130,7 @@ def run_megablast(sequence_file, output_dir, options):
     :type output_dir: string
     :type options: Namespace
 
-    :returns: a list of the output
+    :returns: a list of the output.
 
     """
     output = None

@@ -1,18 +1,28 @@
 #!/usr/bin/env python
-## This file is part of py_megablast.
-## 
-## py_megablast is free software: you can redistribute it and/or modify it under
-## the terms of the GNU General Public License as published by the Free Software
-## Foundation, either version 3 of the License, or (at your option) any later
-## version.
-## 
-## py_megablast is distributed in the hope that it will be useful, but WITHOUT
-## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-## FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-## details.
-## 
-## You should have received a copy of the GNU General Public License along with
-## py_megablast.  If not, see <http://www.gnu.org/licenses/>.
+
+# pymegablast is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+
+# pymegablast is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+
+# You should have received a copy of the GNU General Public License along with
+# pymegablast.  If not, see <http://www.gnu.org/licenses/>.
+
+__author__ = "Louis-Philippe Lemieux Perreault"
+__copyright__ = ("Copyright 2014 Louis-Philippe Lemieux Perreault. "
+                 "All rights reserved.")
+__license__ = "GNU General Public"
+__credits__ = ["Louis-Philippe Lemieux Perreault", ]
+__version__ = "0.3"
+__maintainer__ = "Louis-Philippe Lemieux Perreault"
+__email__ = "louis-philippe.lemieux.perreault@statgen.org"
+__status__ = "Development"
+
 
 import os
 import sys
@@ -24,42 +34,52 @@ from subprocess import check_output, CalledProcessError
 
 from Bio import SeqIO
 
-# Getting the version
-prog_version = "0.2"
 
 def main():
-    """The main function.
+    """The main function."""
+    # Creating the argument parser
+    desc = """Runs pymegablast (version {}).""".format(__version__)
+    parser = argparse.ArgumentParser(description=desc)
 
-    """
-    # Getting and checking the options
-    args = parse_args()
-    check_args(args)
+    # Executing
+    try:
+        # Getting and checking the options
+        args = parse_args(parser)
+        check_args(args)
 
-    # Printing the version of the script
-    print "wrapper_megablast version {}".format(prog_version)
+        # Printing the version of the script
+        print "pymegablast version {}".format(__version__)
 
-    # Creating the output directory
-    if not os.path.isdir(args.output_dir):
-        os.mkdir(args.output_dir)
+        # Creating the output directory
+        if not os.path.isdir(args.output_dir):
+            os.mkdir(args.output_dir)
 
-    # Do we need to split the input sequence?
-    sequence_file = os.path.join(args.output_dir, "megablast_input.fasta")
-    if args.window:
-        # We split
-        split_fasta_sequences(args.input, args.window_length, sequence_file)
-    else:
-        # We don't split, so just copy the file
-        shutil.copyfile(args.input, sequence_file)
+        # Do we need to split the input sequence?
+        sequence_file = os.path.join(args.output_dir, "megablast_input.fasta")
+        if args.window:
+            # We split
+            split_fasta_sequences(args.input, args.window_length,
+                                  sequence_file)
 
-    # Running megablast
-    results = run_megablast(sequence_file, args.output_dir, args)
+        else:
+            # We don't split, so just copy the file
+            shutil.copyfile(args.input, sequence_file)
 
-    # Parsing the results
-    results = parse_results(results)
+        # Running megablast
+        results = run_megablast(sequence_file, args.output_dir, args)
 
-    # Now generate the final output
-    generate_final_output(results, sequence_file, args.output_dir)
+        # Parsing the results
+        results = parse_results(results)
 
+        # Now generate the final output
+        generate_final_output(results, sequence_file, args.output_dir)
+
+    except KeyboardInterrupt:
+        print >>sys.stderr, "Cancelled by user"
+        sys.exit(0)
+
+    except ProgramError as e:
+        parser.error(e.message)
 
 
 def generate_final_output(results, sequence_file, output_dir):
@@ -87,7 +107,6 @@ def generate_final_output(results, sequence_file, output_dir):
     o_file.close()
 
 
-
 def parse_results(results):
     """Parse the megablast results.
 
@@ -106,7 +125,6 @@ def parse_results(results):
     counter = Counter([i.split("\t")[0] for i in results])
 
     return counter
-
 
 
 def run_megablast(sequence_file, output_dir, options):
@@ -133,9 +151,11 @@ def run_megablast(sequence_file, output_dir, options):
                                "-W", str(options.word_size),
                                "-s", str(options.minimal_hit_score)])
         print
+
     except OSError:
         msg = "megablast: command not found"
         raise ProgramError(msg)
+
     except CalledProcessError:
         msg = "megablast: problem with megablast"
         raise ProgramError(msg)
@@ -147,6 +167,7 @@ def run_megablast(sequence_file, output_dir, options):
     o_file = None
     try:
         o_file = open(os.path.join(output_dir, "megablast_results.txt"), "w")
+
     except IOError:
         msg = "can't write file to {}".format(output_dir)
         raise ProgramError(msg)
@@ -159,7 +180,6 @@ def run_megablast(sequence_file, output_dir, options):
     o_file.close()
 
     return output
-
 
 
 def split_fasta_sequences(input_file, window_length, output_file):
@@ -198,7 +218,6 @@ def split_fasta_sequences(input_file, window_length, output_file):
     SeqIO.write(sequences, output_file, "fasta")
 
 
-
 def check_args(args):
     """Checks the arguments and options.
 
@@ -226,18 +245,12 @@ def check_args(args):
     return True
 
 
-
-def parse_args():
+def parse_args(parser):
     """Parses the command line options and arguments.
 
     :returns: A :py:class:`argparse.Namespace` object created by the
-              :py:mod:`argparse` module. It contains the values of the different
-              options.
-
-    ===============   =======  ================================================
-        Options        Type                      Description
-    ===============   =======  ================================================
-    ===============   =======  ================================================
+              :py:mod:`argparse` module. It contains the values of the
+              different options.
 
     .. note::
         No option check is done here (except for the one automatically done by
@@ -245,13 +258,58 @@ def parse_args():
         :py:func:`checkArgs`).
 
     """
-    return parser.parse_args()
+    # General options
+    parser.add_argument("-v", "--version", action="version",
+                        version="%(prog)s {}".format(__version__))
 
+    # Input file options
+    group = parser.add_argument_group("Input Files")
+    group.add_argument("-i", "--input", type=str, metavar="FILE",
+                       required=True, help=("The file containing the "
+                                            "sequence(s)."))
+
+    # The sequence pre-processing options
+    group = parser.add_argument_group("Sequence(s) Pre-Processing")
+    group.add_argument("-w", "--window", action="store_true",
+                       help=("If set to True, the sequence(s) will be split "
+                             "by a window of X characters (see "
+                             "-wl/--window-length option). "
+                             "[Default: False]"))
+    group.add_argument("-wl", "--window-length", type=int, metavar="INT",
+                       default=20, help=("The window size (if -w/--window "
+                                         "option is used). "
+                                         "[Default: %(default)d]"))
+
+    # The megablast options
+    group = parser.add_argument_group("MegaBlast Options")
+    group.add_argument("-d", "--database", type=str, metavar="PATH",
+                       default=os.path.join(os.sep, "mnt", "isi",
+                                            "reference", "Genome_Build_37",
+                                            "chromosomes"),
+                       help=("The database to use for the search. "
+                             "[Default: %(default)s]"))
+    group.add_argument("-W", "--word-size", type=int, metavar="INT",
+                       default=10, help=("The word size for MegaBlast. "
+                                         "[Default: %(default)d]"))
+    group.add_argument("-s", "--minimal-hit-score", type=int, metavar="INT",
+                       default=17, help=("The minimal hit score for "
+                                         "MegaBlast. [Default: "
+                                         "%(default)d]"))
+
+    # Were to save the output files
+    group = parser.add_argument_group("Output Files")
+    group.add_argument("-o", "--output-dir", type=str, metavar="DIR",
+                       default="megablast.{}".format(
+                               datetime.today().strftime("%Y-%m-%d_%H.%M.%S")),
+                       help=("The name of the output directory. "
+                             "[Default: %(default)s]"))
+
+    return parser.parse_args()
 
 
 class ProgramError(Exception):
     """An :py:class:`Exception` raised in case of a problem.
-    
+
     :param msg: the message to print to the user before exiting.
     :type msg: string
 
@@ -269,55 +327,6 @@ class ProgramError(Exception):
         return self.message
 
 
-
-# The parser object
-desc = """Runs py_megablast (version {}).""".format(prog_version)
-parser = argparse.ArgumentParser(description=desc)
-
-group = parser.add_argument_group("Input Files")
-group.add_argument("-i", "--input", type=str, metavar="FILE", required=True,
-                   help=("The file containing the sequence(s)."))
-
-# The sequence pre-processing options
-group = parser.add_argument_group("Sequence(s) Pre-Processing")
-group.add_argument("-w", "--window", action="store_true",
-                   help=("If set to True, the sequence(s) will be split by a "
-                         "window of X characters (see -wl/--window-length "
-                         "option). [Default: False]"))
-group.add_argument("-wl", "--window-length", type=int, metavar="INT",
-                   default=20, help=("The window size (if -w/--window option "
-                                     "is used). [Default: %(default)d]"))
-
-# The megablast options
-group = parser.add_argument_group("MegaBlast Options")
-group.add_argument("-d", "--database", type=str, metavar="PATH",
-                   default=os.path.join(os.sep, "mnt", "isi",
-                                        "reference","Genome_Build_37",
-                                        "chromosomes"),
-                   help=("The database to use for the search. "
-                         "[Default: %(default)s]"))
-group.add_argument("-W", "--word-size", type=int, metavar="INT", default=10,
-                   help=("The word size for MegaBlast. [Default: %(default)d]"))
-group.add_argument("-s", "--minimal-hit-score", type=int, metavar="INT",
-                   default=17, help=("The minimal hit score for MegaBlast. "
-                                     "[Default: %(default)d]"))
-
-# Were to save the output files
-group = parser.add_argument_group("Output Files")
-group.add_argument("-o", "--output-dir", type=str, metavar="DIR",
-                   default="megablast.{}".format(
-                        datetime.today().strftime("%Y-%m-%d_%H.%M.%S")),
-                   help=("The name of the output directory. "
-                         "[Default: %(default)s]"))
-
-
-
-# Calling the main, if necessery
+# Calling the main, if necessary
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print >>sys.stderr, "Cancelled by user"
-        sys.exit(0)
-    except ProgramError as e:
-        parser.error(e.message)
+    main()
